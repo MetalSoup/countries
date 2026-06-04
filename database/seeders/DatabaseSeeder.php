@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CountrySeeder::class,
+            TagSeeder::class,
         ]);
 
         // User::factory(10)->create();

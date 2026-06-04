@@ -8,6 +8,8 @@ Route::get('/', function(){
     return inertia('welcome', compact('countries'));
 })->name('home');
 
+Route::inertia('countries', 'countries')->name('countries');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });

@@ -11,7 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->timestamps();
-            $table->index(['name']);
+            // enforce uniqueness at DB level (may be case-insensitive depending on DB collation)
+            $table->unique('name');
         });
     }
 

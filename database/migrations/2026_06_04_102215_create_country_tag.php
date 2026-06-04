@@ -8,8 +8,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('country_tag', function (Blueprint $table) {
-            $table->foreignId('country_id');
-            $table->foreignId('tag_id');
+            $table->foreignId('country_id')->constrained('countries')->onDelete('cascade');
+            $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
+            $table->primary(['country_id', 'tag_id']);
         });
     }
 
