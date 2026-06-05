@@ -38,12 +38,13 @@ const CountryTableRow = React.memo(({ country, isSelected, onToggleSelect, onSyn
         type="checkbox"
         checked={isSelected}
         onChange={() => onToggleSelect(country.id)}
+        id={`select-${country.id}`}
       />
     </td>
     <td className="border border-gray-300 px-4 py-2">
-      {country.name}
+        <label htmlFor={`select-${country.id}`}>{country.name}</label>
     </td>
-    <td className="border border-gray-300 px-4 py-2 no-wrap">
+    <td className="border border-gray-300 px-4 py-2 text-nowrap">
       {country.continent}
     </td>
     <td className="border border-gray-300 px-4 py-2">
@@ -264,8 +265,7 @@ export default function Countries() {
   }
 
   async function deleteTag(tag: any): Promise<void> {
-    // noinspection SqlNoDataSourceInspection
-    if (!confirm(`Delete tag "${tag.name}"? This will be detached from all countries.`)) {
+    if (!confirm(`Delete tag "${tag.name}"? This will be removed on all countries.`)) {
       return;
     }
 
@@ -355,7 +355,7 @@ export default function Countries() {
                       {tags.map((t: any) => (
                           <Badge
                               key={t.id}
-                              className={`cursor-pointer capitalize mr-1 ${filterTagIds.includes(t.id) ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}
+                              className={`relative  cursor-pointer capitalize mr-1 ${filterTagIds.includes(t.id) ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}
                               onClick={() => {
                                   setFilterTagIds((ids) =>
                                       ids.includes(t.id)
@@ -364,16 +364,17 @@ export default function Countries() {
                                   );
                               }}
                           >
-                              {t.name} ({t.countries_count ?? 0})
+                              {t.name}
+                              <span className={"text-gray-400"}>{t.countries_count ?? 0}</span>
                           </Badge>
                       ))}
                   </div>
                   <div className="flex items-center gap-2">
                       <span className="text-sm">Match:</span>
-                      <label className={`text-sm ${mode === 'and' ? 'font-medium' : ''}`}>all</label>
-                      <input type="radio" name="mode" checked={mode === 'and'} onChange={() => setMode('and')} />
-                      <label className={`text-sm ${mode === 'or' ? 'font-medium' : ''}`}>any</label>
-                      <input type="radio" name="mode" checked={mode === 'or'} onChange={() => setMode('or')} />
+                      <label htmlFor={"and_select"} className={`text-sm ${mode === 'and' ? 'font-medium' : ''}`}>all</label>
+                      <input id={"and_select"} type="radio" name="mode" checked={mode === 'and'} onChange={() => setMode('and')} />
+                      <label htmlFor={"or_select"} className={`text-sm ${mode === 'or' ? 'font-medium' : ''}`}>any</label>
+                      <input id={"or_select"} type="radio" name="mode" checked={mode === 'or'} onChange={() => setMode('or')} />
                   </div>
                   <Button variant="outline" onClick={() => openEditTag(null)}>
                       <GearIcon size={32} />

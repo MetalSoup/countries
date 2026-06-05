@@ -15,7 +15,8 @@ class CountryFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'code' => $this->faker->word(),
-            'capital' => $this->faker->word(),
+            'capital' => $this->faker->city(),
+            'continent' => $this->faker->randomElement(['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania', 'Antarctica']),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];
