@@ -93,12 +93,14 @@ export default function Countries() {
   const [sortBy, setSortBy] = useState<'name' | 'capital' | 'continent' | 'tags'>('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [showSelectedOnly, setShowSelectedOnly] = useState<boolean>(false);
+  const [searchTags, setSearchTags] = useState<boolean>(false);
 
   const searchRef = useRef<string>(search);
   const filterTagIdsRef = useRef<number[]>(filterTagIds);
   const modeRef = useRef<'or' | 'and'>(mode);
   const sortByRef = useRef<'name' | 'capital' | 'continent' | 'tags'>('name');
   const sortDirRef = useRef<'asc' | 'desc'>('asc');
+  const searchTagsRef = useRef<boolean>(false);
 
   // keep refs in sync with state so our stable fetchCountries can read
   useEffect(() => {
@@ -121,17 +123,24 @@ export default function Countries() {
     sortDirRef.current = sortDir;
   }, [sortDir]);
 
+  useEffect(() => {
+    searchTagsRef.current = searchTags;
+  }, [searchTags]);
+
   const fetchTags = useCallback(async (): Promise<void> => {
     const res = await fetch('/api/tags');
     const json = await res.json();
     setTags(json.data || []);
   }, []);
 
-  const fetchCountries = useCallback(async (opts?: { search?: string; tagIds?: number[]; mode?: 'or' | 'and'; sortBy?: string; sortDir?: string }) => {
+  const fetchCountries = useCallback(async (opts?: { search?: string; tagIds?: number[]; mode?: 'or' | 'and'; sortBy?: string; sortDir?: string; searchTags?: boolean }) => {
     const params = new URLSearchParams();
 
     const q = opts?.search ?? searchRef.current;
     if (q) { params.append('search', q); }
+
+    const st = opts?.searchTags ?? searchTagsRef.current;
+    if (st) { params.append('search_tags', '1'); }
 
     const ids = opts?.tagIds ?? filterTagIdsRef.current;
     (ids || []).forEach((id) => params.append('tag_ids[]', String(id)));
@@ -170,6 +179,7 @@ export default function Countries() {
     setSelected({});
     setPendingSearch('');
     setShowSelectedOnly(false);
+    setSearchTags(false);
   }
 
   // Debounce fetching when you search, tag filters, mode or sort change
@@ -181,7 +191,7 @@ export default function Countries() {
     debounceRef.current = window.setTimeout(() => {
       // Use explicit overrides so fetchCountries doesn't rely on the stale refs
       // Note: sortBy/sortDir are applied immediately via header clicks, not debounced
-      void fetchCountries({ search: pendingSearch, tagIds: filterTagIds, mode, sortBy, sortDir });
+      void fetchCountries({ search: pendingSearch, tagIds: filterTagIds, mode, sortBy, sortDir, searchTags });
     }, 250);
 
     return () => {
@@ -189,7 +199,7 @@ export default function Countries() {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [pendingSearch, filterTagIds, mode, fetchCountries]);
+  }, [pendingSearch, filterTagIds, mode, searchTags, fetchCountries]);
 
   const toggleSelect = useCallback((id: number) => {
     setSelected((s) => ({ ...s, [id]: !s[id] }));
@@ -385,13 +395,21 @@ export default function Countries() {
               {/* Main content */}
               <div className="flex-1 overflow-x-hidden p-6">
                   <div className="mb-4 flex items-center gap-3">
-                      <div className={'min-w-100'}>
+                      <div className={'min-w-150'}>
                           <Input
                               value={pendingSearch}
                               onChange={(e: any) => setPendingSearch(e.target.value)}
-                              placeholder="Search name, continent or capital"
+                              placeholder={`Search name, continent or capital${searchTags ? ' or tags' : ''} — supports AND / OR`}
                           />
                       </div>
+                      <label className="flex cursor-pointer items-center gap-1.5 text-sm select-none whitespace-nowrap">
+                          <input
+                              type="checkbox"
+                              checked={searchTags}
+                              onChange={(e) => setSearchTags(e.target.checked)}
+                          />
+                          Include tags in search
+                      </label>
                       <div className="ml-auto flex items-center gap-2">
                           <Button
                               variant="ghost"
